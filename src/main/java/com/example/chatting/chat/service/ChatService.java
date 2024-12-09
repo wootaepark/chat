@@ -1,20 +1,7 @@
 package com.example.chatting.chat.service;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
 import org.springframework.stereotype.Service;
-import org.springframework.web.socket.TextMessage;
-import org.springframework.web.socket.WebSocketSession;
 
-import com.example.chatting.chat.entity.ChatRoom;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -22,7 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @RequiredArgsConstructor
 public class ChatService {
-	private final ObjectMapper objectMapper;
+	/*private final ObjectMapper objectMapper;
 	private Map<String, ChatRoom> chatRooms; // 일단 in-memory 저장
 
 	@PostConstruct
@@ -54,5 +41,5 @@ public class ChatService {
 		} catch (IOException e) {
 			log.error(e.getMessage(), e);
 		}
-	}
+	}*/
 }

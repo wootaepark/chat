@@ -1,17 +1,7 @@
 package com.example.chatting.chat.handler;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 import org.springframework.stereotype.Component;
-import org.springframework.web.socket.TextMessage;
-import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
-
-import com.example.chatting.chat.dto.ChatMessageDto;
-import com.example.chatting.chat.entity.ChatRoom;
-import com.example.chatting.chat.service.ChatService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 public class WebSocketChatHandler extends TextWebSocketHandler {
 
-	private final ObjectMapper objectMapper;
+	/*private final ObjectMapper objectMapper;
 	private final ChatService chatService;
 
 	Map<String, WebSocketSession> sessions = new ConcurrentHashMap<>();
@@ -31,7 +21,7 @@ public class WebSocketChatHandler extends TextWebSocketHandler {
 		sessions.put(session.getId(), session); // 세션 객체를 생성하는 부분
 		session.sendMessage(new TextMessage("첫 채팅입니다."));
 
-	}
+	}*/
 
 	/*@Override // 세션에 메시지 전송
 	protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
@@ -47,7 +37,7 @@ public class WebSocketChatHandler extends TextWebSocketHandler {
 		}
 	}*/
 
-	@Override // 세션에 메시지 전송
+	/*@Override // 세션에 메시지 전송
 	protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
 		String payload = message.getPayload();
 		log.info("payload {}", payload);
@@ -55,7 +45,7 @@ public class WebSocketChatHandler extends TextWebSocketHandler {
 		ChatMessageDto chatMessageDto = objectMapper.readValue(payload, ChatMessageDto.class);
 		ChatRoom room = chatService.findRoomById(chatMessageDto.getRoomId());
 		room.handlerActions(session, chatMessageDto, chatService);
-	}
+	}*/
 
 	// 추가 필요 로직
 	// 한 채팅방에는 두 명 이상의 유저가 들어올 수 없다.

@@ -1,39 +1,44 @@
 package com.example.chatting.chat.controller;
 
-import java.util.List;
-
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
+import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.chatting.chat.entity.ChatRoom;
-import com.example.chatting.chat.service.ChatService;
+import com.example.chatting.chat.dto.ChatMessageDto;
+import com.example.chatting.chat.repository.ChatRepository;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
-@RestController
+@Slf4j
 @RequiredArgsConstructor
-@RequestMapping("/chat")
+@RestController
 public class ChatController {
-	private final ChatService chatService;
 
-	@PostMapping
-	public ChatRoom createRoom(@RequestBody String name) {
-		return chatService.createRoom(name);
+	// 기능 : 입장 및 채팅 송신
+
+	private final SimpMessageSendingOperations template;
+	private final ChatRepository chatRepository;
+
+	@MessageMapping("/enterUser") // 유저 방 입장
+	public void enterUser(@Payload ChatMessageDto chatMessageDto, SimpMessageHeaderAccessor headerAccessor) {
+		chatRepository.plusUserCnt(chatMessageDto.getRoomId());
+		String userUUID = chatRepository.addUser(chatMessageDto.getRoomId(), chatMessageDto.getSender());
+
+		headerAccessor.getSessionAttributes().put("userUUID", userUUID);
+		headerAccessor.getSessionAttributes().put("roomId", chatMessageDto.getRoomId());
+
+		chatMessageDto.setMessage(chatMessageDto.getSender() + "님 입장!");
+		template.convertAndSend("/sub/chat/room/" + chatMessageDto.getRoomId(), chatMessageDto);
 	}
 
-	@GetMapping
-	public List<ChatRoom> findAllRooms() {
-		return chatService.findAllRoom();
-		// 유저가 Session 에 들어가고 나서 요청 시에 오류가 발생
-		/*
-		 {
-        "roomId": "e9f6ad85-9aa2-4172-9d86-306311e9cd00",
-        "roomName": "{\r\n    \"name\" : \"채팅방2\"\r\n}",
-        "sessions": [] // <- 여기에 뭐가 들어가면 json parsing 에러 발생
-        }
-		 */
+	@MessageMapping("/sendMessage")
+	public void sendMessage(@Payload ChatMessageDto chatMessageDto) {
+		log.info("CHAT {}", chatMessageDto);
+		chatMessageDto.setMessage(chatMessageDto.getMessage());
+		template.convertAndSend("/sub/chat/room/" + chatMessageDto.getRoomId(), chatMessageDto);
 	}
+
 }
