@@ -1,6 +1,5 @@
 package com.example.chatting.chat.handler;
 
-import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -9,8 +8,21 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
+import com.example.chatting.chat.dto.ChatMessageDto;
+import com.example.chatting.chat.entity.ChatRoom;
+import com.example.chatting.chat.service.ChatService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@RequiredArgsConstructor
 @Component
-public class WebSocketHandler extends TextWebSocketHandler {
+public class WebSocketChatHandler extends TextWebSocketHandler {
+
+	private final ObjectMapper objectMapper;
+	private final ChatService chatService;
 
 	Map<String, WebSocketSession> sessions = new ConcurrentHashMap<>();
 
@@ -21,7 +33,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
 	}
 
-	@Override // 세션에 메시지 전송
+	/*@Override // 세션에 메시지 전송
 	protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
 
 		// 브로드캐스팅 방식으로 세션 접속한 모든 이에게 전송
@@ -33,6 +45,16 @@ public class WebSocketHandler extends TextWebSocketHandler {
 				webSocketSession.sendMessage(textMessage);
 			}
 		}
+	}*/
+
+	@Override // 세션에 메시지 전송
+	protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
+		String payload = message.getPayload();
+		log.info("payload {}", payload);
+
+		ChatMessageDto chatMessageDto = objectMapper.readValue(payload, ChatMessageDto.class);
+		ChatRoom room = chatService.findRoomById(chatMessageDto.getRoomId());
+		room.handlerActions(session, chatMessageDto, chatService);
 	}
 
 	// 추가 필요 로직
