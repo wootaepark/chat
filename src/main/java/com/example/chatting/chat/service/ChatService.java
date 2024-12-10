@@ -2,19 +2,21 @@ package com.example.chatting.chat.service;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
 import com.example.chatting.chat.dto.ChatRoomDto;
+import com.example.chatting.chat.dto.CreateRoomReqDto;
+import com.example.chatting.chat.entity.ChatRoom;
+import com.example.chatting.chat.repository.ChatRoomRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -22,30 +24,42 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @RequiredArgsConstructor
 public class ChatService {
+
 	private final ObjectMapper objectMapper;
-	private Map<String, ChatRoomDto> chatRooms; // 일단 in-memory 저장
+	private final ChatRoomRepository chatRoomRepository;
 
-	@PostConstruct
-	private void init() {
-		chatRooms = new HashMap<>();
-	}
+	private final Map<String, ChatRoomDto> chatRoomMap = new ConcurrentHashMap<>();
 
-	public List<ChatRoomDto> findAllRoom() {
-		return new ArrayList<>(chatRooms.values());
+	public List<ChatRoom> findAllRoom() {
+		List<ChatRoom> rooms = chatRoomRepository.findAll();
+		return new ArrayList<>(rooms);
 	}
 
 	public ChatRoomDto findRoomById(String id) {
-		return chatRooms.get(id);
+		ChatRoomDto room = chatRoomMap.get(id);
+		if (room == null) {
+			ChatRoom chatRoom = chatRoomRepository.findByRoomId(id)
+				.orElseThrow(() -> new RuntimeException("Room not found"));
+			room = ChatRoomDto.builder()
+				.roomId(chatRoom.getRoomId())
+				.roomName(chatRoom.getTitle())
+				.build();
+			chatRoomMap.put(id, room);
+		}
+		return room;
+
 	}
 
-	public ChatRoomDto createRoom(String roomName) {
+	public ChatRoom createRoom(CreateRoomReqDto reqDto) {
 		String randomId = UUID.randomUUID().toString();
-		ChatRoomDto chatRoomDto = ChatRoomDto.builder()
+		ChatRoom chatRoom = ChatRoom.builder()
 			.roomId(randomId)
-			.roomName(roomName)
+			.title(reqDto.getTitle())
 			.build();
-		chatRooms.put(randomId, chatRoomDto);
-		return chatRoomDto;
+
+		chatRoomRepository.save(chatRoom);
+
+		return chatRoom;
 	}
 
 	public <T> void sendMessage(WebSocketSession session, T message) {

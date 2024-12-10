@@ -6,6 +6,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -22,5 +23,11 @@ public class ChatRoom {
 	private String roomId;
 
 	private String title;
+
+	@Builder
+	public ChatRoom(String roomId, String title) {
+		this.roomId = roomId;
+		this.title = title;
+	}
 
 }

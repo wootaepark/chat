@@ -25,7 +25,7 @@ public class ChatRoomDto {
 	public void handlerActions(WebSocketSession session, ChatMessageDto chatMessageDto, ChatService chatService) {
 		if (chatMessageDto.getMessageType().equals(ChatMessageDto.MessageType.ENTER)) {
 			sessions.add(session);
-			chatMessageDto.setMessage(chatMessageDto.getSender() + "님이 입장했습니다.");
+			chatMessageDto.setMessage(chatMessageDto.getSender() + " 님이 입장했습니다.");
 		}
 		sendMessage(chatMessageDto, chatService);
 	}

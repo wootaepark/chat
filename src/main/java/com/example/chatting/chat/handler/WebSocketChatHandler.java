@@ -33,19 +33,20 @@ public class WebSocketChatHandler extends TextWebSocketHandler {
 
 	}
 
-	/*@Override // 세션에 메시지 전송
-	protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
-
-		// 브로드캐스팅 방식으로 세션 접속한 모든 이에게 전송
-		String payload = "세션 아이디 " + session.getId() + "내용 : " + message.getPayload() + "  현재시간" + LocalDateTime.now();
-		TextMessage textMessage = new TextMessage(payload);
-
-		for (WebSocketSession webSocketSession : sessions.values()) {
-			if (webSocketSession.isOpen()) {
-				webSocketSession.sendMessage(textMessage);
-			}
-		}
-	}*/
+	// @Override // 세션에 메시지 전송
+	// protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
+	//
+	// 	// 브로드캐스팅 방식으로 세션 접속한 모든 이에게 전송
+	// 	String payload =
+	// 		"세션 아이디 " + session.getId() + " 내용 : " + message.getPayload() + "  현재시간 : " + LocalDateTime.now();
+	// 	TextMessage textMessage = new TextMessage(payload);
+	//
+	// 	for (WebSocketSession webSocketSession : sessions.values()) {
+	// 		if (webSocketSession.isOpen()) {
+	// 			webSocketSession.sendMessage(textMessage);
+	// 		}
+	// 	}
+	// }
 
 	@Override // 세션에 메시지 전송
 	protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
