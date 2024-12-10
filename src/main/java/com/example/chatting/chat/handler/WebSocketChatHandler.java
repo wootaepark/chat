@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.stereotype.Component;
+import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
@@ -25,11 +26,34 @@ public class WebSocketChatHandler extends TextWebSocketHandler {
 	private final ChatService chatService;
 
 	Map<String, WebSocketSession> sessions = new ConcurrentHashMap<>();
+	// 전체 채팅에 대한 유저의 세션
 
 	@Override // 웹 소켓 연결 시
 	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
 		sessions.put(session.getId(), session); // 세션 객체를 생성하는 부분
+		log.info("sessionId" + session.getId());
 		session.sendMessage(new TextMessage("첫 채팅입니다."));
+
+		// 문제 발생상황
+		// 웹 소켓 연결을 해제하고 다시 연결하면 서버를 재시작 하지 않는 한 원하는 방으로의 입장이 안된다.
+
+	}
+
+	@Override // 세션에 메시지 전송
+	protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
+		String payload = message.getPayload();
+		log.info("payload {}", payload);
+
+		ChatMessageDto chatMessageDto = objectMapper.readValue(payload, ChatMessageDto.class);
+		ChatRoomDto room = chatService.findRoomById(chatMessageDto.getRoomId());
+		room.handlerActions(session, chatMessageDto, chatService);
+	}
+
+	@Override // 웹 소켓 연결 해제 시 수행할 동작
+	public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
+		log.info("closed sessionId : " + session.getId());
+		chatService.removeSessionFromRoom(session.getId());
+		sessions.remove(session.getId());
 
 	}
 
@@ -46,17 +70,8 @@ public class WebSocketChatHandler extends TextWebSocketHandler {
 	// 			webSocketSession.sendMessage(textMessage);
 	// 		}
 	// 	}
+
 	// }
-
-	@Override // 세션에 메시지 전송
-	protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
-		String payload = message.getPayload();
-		log.info("payload {}", payload);
-
-		ChatMessageDto chatMessageDto = objectMapper.readValue(payload, ChatMessageDto.class);
-		ChatRoomDto room = chatService.findRoomById(chatMessageDto.getRoomId());
-		room.handlerActions(session, chatMessageDto, chatService);
-	}
 
 	// 추가 필요 로직
 	// 한 채팅방에는 두 명 이상의 유저가 들어올 수 없다.
