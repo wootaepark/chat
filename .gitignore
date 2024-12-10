@@ -33,6 +33,8 @@ out/
 /nbdist/
 /.nb-gradle/
 
+docker-compose.yml
+
 ### VS Code ###
 .vscode/
 application.properties

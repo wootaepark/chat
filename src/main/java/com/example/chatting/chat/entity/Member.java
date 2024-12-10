@@ -6,21 +6,23 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Table
-@Getter
+@Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class ChatRoom {
+@AllArgsConstructor(access = AccessLevel.PUBLIC)
+@Getter
+public class Member {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	private String roomId;
-
-	private String title;
+	private String name;
 
 }

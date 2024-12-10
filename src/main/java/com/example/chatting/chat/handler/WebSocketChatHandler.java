@@ -9,7 +9,7 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import com.example.chatting.chat.dto.ChatMessageDto;
-import com.example.chatting.chat.entity.ChatRoom;
+import com.example.chatting.chat.dto.ChatRoomDto;
 import com.example.chatting.chat.service.ChatService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -53,7 +53,7 @@ public class WebSocketChatHandler extends TextWebSocketHandler {
 		log.info("payload {}", payload);
 
 		ChatMessageDto chatMessageDto = objectMapper.readValue(payload, ChatMessageDto.class);
-		ChatRoom room = chatService.findRoomById(chatMessageDto.getRoomId());
+		ChatRoomDto room = chatService.findRoomById(chatMessageDto.getRoomId());
 		room.handlerActions(session, chatMessageDto, chatService);
 	}
 
